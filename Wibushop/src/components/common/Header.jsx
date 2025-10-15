@@ -28,6 +28,13 @@ const Header = () => {
             Về chúng tôi
           </Link>
           
+          <Link 
+            href="/orders" 
+            className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+          >
+            Đơn hàng của tôi
+          </Link>
+          
           <div className="flex cursor-pointer items-center gap-2 rounded-md p-2 px-3 text-gray-800">
             <div className="rounded-lg border p-[3px]">
               <svg xmlns="http://www.w3.org/2000/svg" width="28px" height="28px" viewBox="0 0 24 24">

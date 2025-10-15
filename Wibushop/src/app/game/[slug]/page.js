@@ -1,53 +1,66 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Header from '../../../components/common/Header';
 import Footer from '../../../components/common/Footer';
 import GamePurchaseForm from '../../../components/game/GamePurchaseForm';
+import { gamesApi } from '../../../lib/api';
 
 export default function GamePage() {
   const router = useRouter();
   const params = useParams();
   const slug = params.slug;
+  
+  const [game, setGame] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data - trong thực tế sẽ lấy từ API dựa vào slug
-  const gameData = {
-    'genshin-impact': {
-      slug: 'genshin-impact',
-      name: 'Genshin Impact UID',
-      banner: '/assets/banner.png',
-      description: `
-        <p><strong><span style="color: rgb(224, 62, 45);">CÁC BẠN TẠO TÀI KHOẢN WEB ĐỂ NHẬN HÓA ĐƠN & KIỂM TRA TIẾN TRÌNH NẠP GAME NHA.</span><br><br>
-        Đây là phương thức nạp bằng UID, gói nạp sẽ có ngay lập tức vào tài khoản Genshin Impact của bạn sau khi thanh toán thành công.</strong><br><br>
-        <strong>Lưu ý:<br></strong>
-        1. Cần nhập chính xác UID và Server. Nếu nhập sai Shop Wjbu không hỗ trợ hoàn tiền.<br>
-        2. Các gói nạp vẫn nhận được <strong>bonus x2</strong> nếu nạp lần đầu.<br><br></p>
-      `
-    },
-    'honkai-star-rail': {
-      slug: 'honkai-star-rail',
-      name: 'Honkai Star Rail UID',
-      banner: '/assets/banner_2.png',
-      description: `
-        <p><strong><span style="color: #e03e2d;">CÁC BẠN TẠO TÀI KHOẢN WEB ĐỂ NHẬN HÓA ĐƠN & KIỂM TRA TIẾN TRÌNH NẠP GAME NHA.<br></span></strong></p>
-        <p><strong><br>Đây là phương thức nạp <span style="color: #e03e2d;">Tự Động</span> bằng UID, gói nạp sẽ có <span style="color: #e03e2d;">Ngay Lập Tức</span> vào tài khoản Honkai: Star Rail của bạn sau khi thanh toán thành công.</strong><br><br>
-        <strong>Lưu ý:<br></strong>
-        1. Cần nhập chính xác UID và Server. Nếu nhập sai Shop Wjbu không hỗ trợ hoàn tiền.<br>
-        2. Các gói nạp vẫn nhận được <strong>bonus x2</strong> nếu nạp lần đầu.<br><br></p>
-      `
+  // Fetch game data từ API
+  useEffect(() => {
+    const fetchGame = async () => {
+      try {
+        setLoading(true);
+        const response = await gamesApi.getBySlug(slug);
+        setGame(response.data);
+      } catch (err) {
+        setError('Không thể tải thông tin game');
+        console.error('Error fetching game:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchGame();
     }
-  };
+  }, [slug]);
 
-  const game = gameData[slug];
-
-  if (!game) {
+  // Loading state
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">Game không tìm thấy</h1>
+            <div className="text-xl text-gray-600">Đang tải...</div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Error or game not found
+  if (error || !game) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+              {error || 'Game không tìm thấy'}
+            </h1>
             <button 
               onClick={() => router.push('/')}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -78,10 +91,10 @@ export default function GamePage() {
         }}
       >
         <div className="game-detail">
-          <div className="relative z-10">
-            <div className="container relative px-4 pb-8 pt-10 md:px-0 z-10">
+          <div className="relative z-20">
+            <div className="container relative px-4 pb-8 pt-10 md:px-0 z-20">
               {/* Breadcrumb */}
-              <div className="mb-4 rounded-lg bg-white p-3">
+              <div className="mb-4 rounded-lg bg-white/95 backdrop-blur-sm p-3 shadow-lg">
                 <nav aria-label="Breadcrumb" className="flex">
                   <ol className="inline-flex items-center space-x-1 md:space-x-2">
                     <li className="inline-flex items-center">
